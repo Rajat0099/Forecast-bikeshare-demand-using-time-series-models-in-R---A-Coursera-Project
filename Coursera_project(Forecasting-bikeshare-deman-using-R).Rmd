@@ -1,0 +1,173 @@
+---
+title: "Forecast daily bike rental demand using time series models"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+author: "Rajat Rana"
+---
+
+# About Data Analysis Report
+
+This RMarkdown file contains the report of the data analysis done for the project on forecasting daily bike rental demand using time series models in R. It contains analysis such as data exploration, summary statistics and building the time series models. The final report was completed on `r date()`. 
+
+**Data Description:**
+
+This dataset contains the daily count of rental bike transactions between years 2011 and 2012 in Capital bikeshare system with the corresponding weather and seasonal information.
+
+**Data Source:** https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset
+
+**Relevant Paper:** 
+
+Fanaee-T, Hadi, and Gama, Joao, 'Event labeling combining ensemble detectors and background knowledge', Progress in Artificial Intelligence (2013): pp. 1-15, Springer Berlin Heidelberg
+
+
+
+# Task One: Load and explore the data
+
+## Load data and install packages
+
+```{r}
+## Import required packages
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(lubridate)) install.packages("lubridate")
+if (!require(timetk)) install.packages("timetk")
+if (!require(forecast)) install.packages("forecast")
+
+# Load the packages
+library(tidyverse)
+library(lubridate)
+library(timetk)
+library(forecast)
+
+# Load the data
+url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip"
+download.file(url, destfile = "bike_data.zip")
+unzip("bike_data.zip")
+
+# Read the dataset (day.csv file)
+bike_data <- read.csv("day.csv")
+
+# View the first few rows of the data
+head(bike_data)
+
+
+```
+
+
+## Describe and explore the data
+
+```{r}
+# Summary statistics
+summary(bike_data)
+
+# Check for missing values
+sum(is.na(bike_data))
+
+# View data structure
+str(bike_data)
+
+# Convert date column to Date type
+bike_data$dteday <- as.Date(bike_data$dteday)
+
+# Plot rental count by date
+ggplot(bike_data, aes(x = dteday, y = cnt)) +
+  geom_line() +
+  labs(title = "Daily Bike Rentals Over Time", x = "Date", y = "Number of Rentals")
+
+```
+
+
+
+# Task Two: Create interactive time series plots
+
+```{r}
+## Read about the timetk package
+# ?timetk
+# Interactive time series plot using timetk
+bike_data %>%
+  plot_time_series(dteday, cnt, .interactive = TRUE, .title = "Interactive Plot of Daily Bike Rentals")
+
+
+```
+
+
+
+
+# Task Three: Smooth time series data
+
+```{r}
+# Smooth the time series data using moving averages
+bike_data %>%
+  mutate(cnt_smooth = forecast::ma(cnt, order = 7)) %>%
+  ggplot(aes(x = dteday)) +
+  geom_line(aes(y = cnt), color = "blue", alpha = 0.5) +
+  geom_line(aes(y = cnt_smooth), color = "red") +
+  labs(title = "Smoothed Bike Rentals with 7-Day Moving Average", y = "Number of Rentals", x = "Date")
+
+```
+
+
+
+# Task Four: Decompse and access the stationarity of time series data
+
+```{r}
+# Install tseries package if not installed
+if (!require(tseries)) install.packages("tseries")
+
+# Load the package
+library(tseries)
+
+# Decompose time series data
+bike_ts <- ts(bike_data$cnt, frequency = 365)
+decomp <- decompose(bike_ts)
+
+# Plot the decomposition
+plot(decomp)
+
+# Test for stationarity using Augmented Dickey-Fuller test
+adf_test_result <- adf.test(bike_ts)
+
+# View ADF test result
+print(adf_test_result)
+
+
+```
+
+
+
+# Task Five: Fit and forecast time series data using ARIMA models
+
+```{r}
+# Fit ARIMA model
+fit <- auto.arima(bike_ts)
+
+# Forecast future rentals for the next 30 days
+forecast_vals <- forecast(fit, h = 30)
+
+# Plot the forecast
+autoplot(forecast_vals) +
+  labs(title = "Bike Rental Forecast for Next 30 Days", x = "Date", y = "Number of Rentals")
+
+```
+
+
+
+# Task Six: Findings and Conclusions
+
+---
+
+### Key Steps in the Project:
+
+1. **Data Loading & Cleaning**: The dataset is loaded from the UCI repository and cleaned by converting the date to a proper format and handling missing values.
+
+2. **Data Exploration**: Summary statistics and time series plots give insights into the overall pattern of bike rentals over time.
+
+3. **Smoothing**: A 7-day moving average is used to smooth the fluctuations in daily bike rental counts.
+
+4. **Stationarity Test & Decomposition**: The time series is decomposed to view trends, seasonality, and residuals. An Augmented Dickey-Fuller test is used to assess stationarity.
+
+5. **ARIMA Model**: An ARIMA model is fitted to forecast future bike rentals, and a 30-day forecast is made to assist with business decisions.
+
+6. **Conclusions**: Business insights based on the analysis and recommendations for fleet and pricing optimizations.
+
+---
