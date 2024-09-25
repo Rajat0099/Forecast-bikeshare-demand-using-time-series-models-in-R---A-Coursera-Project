@@ -1,0 +1,54 @@
+
+Forecasting Daily Bike Rental Demand using Time Series Models
+
+Author: Rajat Rana
+Date: 2024-09-25
+
+## Introduction
+This report outlines the analysis of daily bike rental demand using time series forecasting models. The dataset used contains daily bike rental transactions from the Capital Bikeshare system, collected between 2011 and 2012, along with corresponding weather and seasonal information. The goal is to build time series models that can forecast future demand and provide insights for business decisions.
+
+## Data Description
+The dataset contains several variables including:
+- Instant: Record index
+- dteday: Date
+- season, yr, mnth: Seasonal and yearly information
+- holiday, weekday, workingday: Indicators for holidays and workdays
+- weathersit: Weather situation
+- temp, atemp: Temperature (actual and feeling)
+- hum: Humidity
+- windspeed: Wind speed
+- casual, registered, cnt: Bike rentals (casual, registered, total)
+
+## Key Steps
+
+### Task 1: Data Loading and Exploration
+The dataset was loaded and examined using summary statistics. The initial exploration showed no missing values, and data types were converted appropriately, including transforming the `dteday` column into a Date format. 
+
+Summary statistics indicated that bike rentals vary significantly across days, with total rentals (cnt) ranging from 22 to over 8700 per day.
+
+### Task 2: Interactive Time Series Plot
+The bike rental data was plotted over time, showing significant seasonal variations with peaks during warmer months.
+
+An interactive time series plot was created using the `timetk` package, which enables dynamic exploration of the rental patterns over time.
+
+### Task 3: Smoothing the Time Series
+To better understand the underlying trend, a 7-day moving average was applied. This smoothed the fluctuations in daily bike rental counts, making the trend clearer.
+
+### Task 4: Decomposition and Stationarity Test
+The time series data was decomposed into trend, seasonal, and residual components. The decomposition plot revealed a clear seasonal pattern, along with a positive trend.
+
+The Augmented Dickey-Fuller (ADF) test was used to assess the stationarity of the data. The test result (p-value = 0.7327) suggested that the series is non-stationary, which aligns with the presence of trend and seasonality in the data.
+
+### Task 5: ARIMA Model and Forecasting
+An ARIMA model was fitted to the bike rental data. The `auto.arima()` function automatically selected the best parameters for the model. After fitting the model, a 30-day forecast was generated, showing expected rentals over the next month.
+
+### Findings and Conclusions
+- The data shows strong seasonality and a positive trend, with higher rentals during the warmer months.
+- The ADF test confirmed non-stationarity, suggesting the need for further differentiation in time series models.
+- The ARIMA model provided a reasonable 30-day forecast, which can be used by the bike rental service to plan fleet availability and pricing strategies.
+
+### Recommendations
+- Seasonal patterns suggest that demand will peak in the summer, so the company should prepare for increased demand during these periods.
+- Weather conditions significantly impact rentals, so a dynamic pricing model based on weather forecasts could optimize revenues.
+- The ARIMA model could be further refined with additional variables such as public events or holidays to improve forecasting accuracy.
+
